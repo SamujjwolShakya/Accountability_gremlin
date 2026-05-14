@@ -44,7 +44,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  cursor: none;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="%23FF4500" /></svg>') 10 10, auto;
 }
 
 /* Subtle background pattern */
@@ -146,7 +146,7 @@ input:focus, select:focus, textarea:focus {
 
 button {
   font-family: var(--font-heading);
-  cursor: none;
+  cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
 }

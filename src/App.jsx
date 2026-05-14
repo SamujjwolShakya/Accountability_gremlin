@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { loadData, saveData, callClaude, authUser } from './utils/api';
-import CustomCursor from './CustomCursor';
 
 // --- Helper Functions ---
 const fmtDate = (d) => new Date(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -381,7 +380,6 @@ export default function App() {
   if (!user) {
     return (
       <>
-        <CustomCursor />
         <Login onLogin={setUser} />
       </>
     );
@@ -400,7 +398,6 @@ export default function App() {
 
   return (
     <div className="main-app-container">
-      <CustomCursor />
       {overdue.length > 0 && <Ticker pledges={data.pledges} />}
       <Header streak={data.streak || 0} user={user} onLogout={handleLogout} />
       <StatsBar pledges={data.pledges} />
