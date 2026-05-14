@@ -22,13 +22,18 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoggingIn(true);
     try {
-      const user = authUser(username, password);
+      const user = await authUser(username, password);
       onLogin(user);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -66,7 +71,9 @@ function Login({ onLogin }) {
             />
           </div>
           {error && <div style={{ color: 'var(--accent-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>{error}</div>}
-          <button type="submit" className="btn-submit" style={{ marginTop: '1rem' }}>ENTER THE DUNGEON 👺</button>
+          <button type="submit" className="btn-submit" style={{ marginTop: '1rem' }} disabled={isLoggingIn}>
+            {isLoggingIn ? 'CONNECTING TO CLOUD...' : 'ENTER THE DUNGEON 👺'}
+          </button>
         </form>
       </div>
     </div>
@@ -396,13 +403,13 @@ export default function App() {
   // Load data when user logs in
   useEffect(() => {
     if (user) {
-      setData(loadData(user.username));
+      loadData(user.username).then(d => setData(d));
     }
   }, [user]);
 
-  function updateData(d) {
+  async function updateData(d) {
     setData(d);
-    saveData(user.username, d);
+    await saveData(user.username, d);
   }
 
   function handleLogout() {
@@ -442,7 +449,13 @@ export default function App() {
     );
   }
 
-  if (!data) return null; // Wait for data to load
+  if (!data) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', fontFamily: 'var(--font-heading)', fontSize: '1.5rem', animation: 'pulseGlow 1s infinite' }}>
+        SUMMONING YOUR PLEDGES FROM THE CLOUD... 👺
+      </div>
+    );
+  }
 
   const filtered = data.pledges.filter((p) => {
     if (filter === 'active') return !p.done && !p.failed;

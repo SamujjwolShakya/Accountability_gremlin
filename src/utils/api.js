@@ -1,47 +1,67 @@
-const STORAGE_KEY_BASE = 'accountability_gremlin_v2_';
+// --- Cloud Database (JSONBlob) ---
+const DB_ID = '019e259e-c506-7122-9fca-6687f75381e3';
+const API_URL = `https://jsonblob.com/api/jsonBlob/${DB_ID}`;
 
-export function loadData(username) {
+async function fetchDB() {
   try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY_BASE + username));
-    return data || { pledges: [], streak: 0 };
-  } catch {
-    return { pledges: [], streak: 0 };
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('DB fetch failed');
+    const data = await res.json();
+    return data.users ? data : { users: {} };
+  } catch (err) {
+    console.error(err);
+    return { users: {} };
   }
 }
 
-export function saveData(username, data) {
-  localStorage.setItem(STORAGE_KEY_BASE + username, JSON.stringify(data));
+async function saveDB(db) {
+  try {
+    await fetch(API_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(db)
+    });
+  } catch (err) {
+    console.error('Failed to save to cloud', err);
+  }
+}
+
+export async function loadData(username) {
+  const db = await fetchDB();
+  return db.users[username]?.data || { pledges: [], streak: 0 };
+}
+
+export async function saveData(username, data) {
+  const db = await fetchDB();
+  if (db.users[username]) {
+    db.users[username].data = data;
+    await saveDB(db);
+  }
 }
 
 // --- Auth Functions ---
-const USERS_KEY = 'gremlin_users';
-
-export function loadUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-export function authUser(username, password) {
-  const users = loadUsers();
-  const usernameLower = username.toLowerCase().trim();
+export async function authUser(username, password) {
+  const db = await fetchDB();
   
+  const usernameLower = username.toLowerCase().trim();
   if (!usernameLower) throw new Error("Username required.");
   if (!password) throw new Error("Password required.");
 
-  if (users[usernameLower]) {
+  if (db.users[usernameLower]) {
     // User exists, check password
-    if (users[usernameLower].password === password) {
-      return { username: usernameLower, originalName: users[usernameLower].originalName };
+    if (db.users[usernameLower].password === password) {
+      return { username: usernameLower, originalName: db.users[usernameLower].originalName };
     } else {
       throw new Error("Incorrect password.");
     }
   } else {
     // Create new user
-    users[usernameLower] = { password, originalName: username.trim() };
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    db.users[usernameLower] = { 
+      password, 
+      originalName: username.trim(),
+      data: { pledges: [], streak: 0 }
+    };
+    await saveDB(db);
     return { username: usernameLower, originalName: username.trim() };
   }
 }
@@ -52,38 +72,28 @@ export async function callClaude(prompt) {
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
   
   if (!apiKey) {
-    console.warn("Missing VITE_ANTHROPIC_API_KEY in environment variables. Simulating response.");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve("THE GREMLIN IS MOCKED BECAUSE YOU FORGOT THE API KEY. But still, do your tasks!");
-      }, 1500);
-    });
+    return new Promise(resolve => setTimeout(() => resolve("MOCK CLAUDE RESPONSE: I am watching you, and I am very disappointed. Do better next time!"), 1000));
   }
 
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true' // Required for client-side fetch
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20240620',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    
-    if (!res.ok) {
-      throw new Error(`API Error: ${res.status}`);
-    }
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+      'anthropic-dangerous-direct-browser-access': 'true' // Required for client-side Vite
+    },
+    body: JSON.stringify({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 150,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
 
-    const data = await res.json();
-    return data.content?.map(b => b.text || '').join('') || '';
-  } catch (error) {
-    console.error("Failed to call Claude:", error);
-    throw error;
+  if (!response.ok) {
+    throw new Error('Claude API error');
   }
+
+  const data = await response.json();
+  return data.content[0].text;
 }
