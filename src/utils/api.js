@@ -72,7 +72,28 @@ export async function callClaude(prompt) {
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
   
   if (!apiKey) {
-    return new Promise(resolve => setTimeout(() => resolve("MOCK CLAUDE RESPONSE: I am watching you, and I am very disappointed. Do better next time!"), 1000));
+    const isFail = prompt.toLowerCase().includes("failed") || prompt.toLowerCase().includes("roast");
+    
+    const failMessages = [
+      "Pathetic. I knew you didn't have it in you.",
+      "Another broken promise. The Gremlin feeds on your failure.",
+      "You call that an effort? My grandmother could do better, and she's a fictional goblin.",
+      "Disappointing, but entirely expected. Enjoy the taste of defeat.",
+      "MOCK CLAUDE RESPONSE: I am watching you, and I am very disappointed. Do better next time!"
+    ];
+    
+    const successMessages = [
+      "Well, well. You actually did it. The Gremlin is mildly impressed.",
+      "A rare victory! Savor it before you inevitably fail the next one.",
+      "Not bad. Not bad at all. Keep this up and I might stop mocking you.",
+      "You survived another day. The Gremlin approves... for now.",
+      "MOCK CLAUDE RESPONSE: YOU DID IT! The Gremlin is proud."
+    ];
+    
+    const messages = isFail ? failMessages : successMessages;
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    
+    return new Promise(resolve => setTimeout(() => resolve(randomMsg), 1000));
   }
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {

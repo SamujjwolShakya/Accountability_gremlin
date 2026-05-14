@@ -1,24 +1,24 @@
 :root {
-  /* Deep dark base colors */
-  --bg-primary: #050505;
-  --bg-secondary: #121212;
-  --bg-card: #18181B;
+  /* Elegant Color Palette */
+  --bg-primary: #1E104E;
+  --bg-secondary: #452E5A;
+  --bg-card: rgba(69, 46, 90, 0.4);
   
-  /* Borders and dividers */
-  --border-color: #27272A;
-  --border-hover: #3F3F46;
+  /* Borders */
+  --border-color: rgba(255, 200, 92, 0.15);
+  --border-hover: rgba(255, 200, 92, 0.35);
   
-  /* Vibrant Accents */
-  --accent-primary: #FF4500;   /* Danger/Gremlin Orange */
-  --accent-glow: rgba(255, 69, 0, 0.4);
-  --accent-secondary: #FFB300; /* Warning Yellow */
-  --accent-success: #00FF88;   /* Success Green */
-  --success-glow: rgba(0, 255, 136, 0.3);
+  /* Accents */
+  --accent-primary: #FF653F;
+  --accent-glow: rgba(255, 101, 63, 0.2);
+  --accent-secondary: #FFC85C;
+  --accent-success: #FFC85C; /* Using warm yellow for success to match palette */
+  --success-glow: rgba(255, 200, 92, 0.2);
   
   /* Text */
   --text-primary: #F4F4F5;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.5);
   
   /* Typography */
   --font-sans: 'Inter', sans-serif;
@@ -55,8 +55,8 @@ body::before {
   pointer-events: none;
   z-index: -1;
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(255, 69, 0, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 0% 100%, rgba(0, 255, 136, 0.03) 0%, transparent 40%);
+    radial-gradient(circle at 50% 0%, rgba(255, 101, 63, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(255, 200, 92, 0.05) 0%, transparent 40%);
 }
 
 #root {
@@ -96,12 +96,12 @@ body::before {
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 15px var(--accent-glow);
-    border-color: var(--accent-primary);
+    box-shadow: 0 0 10px var(--accent-glow);
+    border-color: rgba(255, 101, 63, 0.5);
   }
   50% {
-    box-shadow: 0 0 30px var(--accent-glow);
-    border-color: #FF8C00;
+    box-shadow: 0 0 20px var(--accent-glow);
+    border-color: var(--accent-primary);
   }
 }
 
@@ -213,19 +213,17 @@ button:active {
 
 .streak-container {
   text-align: right;
-  animation: pulseGlow 4s infinite alternate;
   padding: 1rem;
   border-radius: 12px;
-  background: rgba(0, 255, 136, 0.05);
-  border: 1px solid rgba(0, 255, 136, 0.1);
+  background: rgba(255, 200, 92, 0.1);
+  border: 1px solid rgba(255, 200, 92, 0.2);
 }
 
 .streak-value {
   font-family: var(--font-heading);
   font-size: 3rem;
-  color: var(--accent-success);
+  color: var(--accent-secondary);
   line-height: 1;
-  text-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
 }
 
 /* Stats Bar */
@@ -589,6 +587,6 @@ button:active {
   border-left: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
   min-height: 100vh;
-  background: rgba(5, 5, 5, 0.6);
+  background: rgba(30, 16, 78, 0.8);
   backdrop-filter: blur(20px);
 }
