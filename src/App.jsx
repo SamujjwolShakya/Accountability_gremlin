@@ -149,29 +149,44 @@ function AddPledge({ onAdd }) {
   const [deadlineStr, setDeadlineStr] = useState('');
   const [consequence, setConsequence] = useState('');
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState('quick'); // 'quick' or 'custom'
+  const [selectedQuickPick, setSelectedQuickPick] = useState(null);
 
   // Quick picks
   const quickPicks = [
-    { label: 'In 1h', hours: 1 },
-    { label: 'In 4h', hours: 4 },
+    { label: '10 Mins', mins: 10 },
+    { label: '30 Mins', mins: 30 },
+    { label: '1 Hour', hours: 1 },
+    { label: '4 Hours', hours: 4 },
     { label: 'End of Day', eod: true },
-    { label: 'Tomorrow Morning', tmrwMorning: true },
+    { label: 'Tmrw Morning', tmrwMorning: true },
+    { label: 'Tmrw Night', tmrwEod: true },
   ];
 
-  function setQuickPick(opt) {
+  function setQuickPick(opt, index) {
     const d = new Date();
-    if (opt.hours) d.setHours(d.getHours() + opt.hours);
+    if (opt.mins) d.setMinutes(d.getMinutes() + opt.mins);
+    else if (opt.hours) d.setHours(d.getHours() + opt.hours);
     else if (opt.eod) d.setHours(23, 59, 0, 0);
     else if (opt.tmrwMorning) { d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0); }
+    else if (opt.tmrwEod) { d.setDate(d.getDate() + 1); d.setHours(23, 59, 0, 0); }
+    
     // Adjust to local datetime-local format
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     setDeadlineStr(d.toISOString().slice(0, 16));
+    setSelectedQuickPick(index);
+  }
+
+  // Clear selected quick pick if user manually edits the custom input
+  function handleCustomDateChange(e) {
+    setDeadlineStr(e.target.value);
+    setSelectedQuickPick(null);
   }
 
   function submit() {
     if (!task.trim() || !deadlineStr) return;
     onAdd({ task: task.trim(), deadline: new Date(deadlineStr).toISOString(), consequence: consequence.trim() });
-    setTask(''); setDeadlineStr(''); setConsequence(''); setOpen(false);
+    setTask(''); setDeadlineStr(''); setConsequence(''); setOpen(false); setSelectedQuickPick(null);
   }
 
   return (
@@ -189,12 +204,50 @@ function AddPledge({ onAdd }) {
 
           <div>
             <label className="form-label">DEADLINE *</label>
-            <input type="datetime-local" className="form-input" value={deadlineStr} onChange={(e) => setDeadlineStr(e.target.value)} style={{ marginBottom: '0.5rem' }} />
-            <div className="quick-picks">
-              {quickPicks.map((qp, i) => (
-                <button key={i} className="btn-quick-pick" type="button" onClick={() => setQuickPick(qp)}>{qp.label}</button>
-              ))}
+            
+            <div className="tab-container" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <button 
+                type="button"
+                className={`btn-tab ${tab === 'quick' ? 'active' : ''}`} 
+                onClick={() => setTab('quick')}
+              >
+                ⚡ Quick Select
+              </button>
+              <button 
+                type="button"
+                className={`btn-tab ${tab === 'custom' ? 'active' : ''}`} 
+                onClick={() => setTab('custom')}
+              >
+                📅 Custom Date
+              </button>
             </div>
+
+            {tab === 'quick' ? (
+              <div className="quick-picks" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                {quickPicks.map((qp, i) => (
+                  <button 
+                    key={i} 
+                    className={`btn-quick-pick ${selectedQuickPick === i ? 'active' : ''}`} 
+                    type="button" 
+                    onClick={() => setQuickPick(qp, i)}
+                  >
+                    {qp.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <input 
+                  type="datetime-local" 
+                  className="form-input" 
+                  value={deadlineStr} 
+                  onChange={handleCustomDateChange} 
+                />
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Click the calendar icon inside the input to open the date/time picker popup.
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -204,7 +257,7 @@ function AddPledge({ onAdd }) {
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
             <button className="btn-submit" type="button" onClick={submit} disabled={!task.trim() || !deadlineStr}>COMMIT TO THIS 🤝</button>
-            <button className="btn-cancel" type="button" onClick={() => setOpen(false)}>Cancel</button>
+            <button className="btn-cancel" type="button" onClick={() => { setOpen(false); setSelectedQuickPick(null); }}>Cancel</button>
           </div>
         </div>
       )}

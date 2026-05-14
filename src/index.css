@@ -320,6 +320,33 @@ button:active {
   gap: 0.5rem;
 }
 
+.btn-tab {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-tab:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent-secondary);
+  color: var(--text-primary);
+}
+
+.btn-tab.active {
+  background: rgba(255, 179, 0, 0.1);
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+  box-shadow: inset 0 0 10px rgba(255, 179, 0, 0.1);
+}
+
 .btn-quick-pick {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
