@@ -67,9 +67,7 @@ export default function CustomCursor() {
         backgroundColor: 'var(--accent-primary)',
         boxShadow: '0 0 15px var(--accent-glow), 0 0 5px var(--accent-primary)',
         pointerEvents: 'none',
-        zIndex: 9999,
-        mixBlendMode: 'screen',
-        willChange: 'transform'
+        zIndex: 9999
       }}
     />
   );
