@@ -1,16 +1,49 @@
-const STORAGE_KEY = 'accountability_gremlin_v2';
+const STORAGE_KEY_BASE = 'accountability_gremlin_v2_';
 
-export function loadData() {
+export function loadData(username) {
   try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY_BASE + username));
     return data || { pledges: [], streak: 0 };
   } catch {
     return { pledges: [], streak: 0 };
   }
 }
 
-export function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+export function saveData(username, data) {
+  localStorage.setItem(STORAGE_KEY_BASE + username, JSON.stringify(data));
+}
+
+// --- Auth Functions ---
+const USERS_KEY = 'gremlin_users';
+
+export function loadUsers() {
+  try {
+    return JSON.parse(localStorage.getItem(USERS_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+export function authUser(username, password) {
+  const users = loadUsers();
+  const usernameLower = username.toLowerCase().trim();
+  
+  if (!usernameLower) throw new Error("Username required.");
+  if (!password) throw new Error("Password required.");
+
+  if (users[usernameLower]) {
+    // User exists, check password
+    if (users[usernameLower].password === password) {
+      return { username: usernameLower, originalName: users[usernameLower].originalName };
+    } else {
+      throw new Error("Incorrect password.");
+    }
+  } else {
+    // Create new user
+    users[usernameLower] = { password, originalName: username.trim() };
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    return { username: usernameLower, originalName: username.trim() };
+  }
 }
 
 export async function callClaude(prompt) {

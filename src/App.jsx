@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { loadData, saveData, callClaude } from './utils/api';
+import { loadData, saveData, callClaude, authUser } from './utils/api';
 import CustomCursor from './CustomCursor';
 
 // --- Helper Functions ---
@@ -17,9 +17,66 @@ function useNow(intervalMs = 10000) {
   return now;
 }
 
+// --- Login Component ---
+function Login({ onLogin }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    try {
+      const user = authUser(username, password);
+      onLogin(user);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" style={{ background: 'var(--bg-primary)' }}>
+      <div className="modal-content" style={{ animation: 'slideUpFade 0.4s ease' }}>
+        <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', textAlign: 'center' }}>
+          <span className="text-gradient">GREMLIN</span> LOGIN
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '2rem', textAlign: 'center', textTransform: 'uppercase' }}>
+          New here? Type any name to create an account.
+        </div>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label className="form-label">USERNAME</label>
+            <input 
+              type="text" 
+              className="form-input" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              placeholder="e.g. Samujjwol"
+              required
+            />
+          </div>
+          <div>
+            <label className="form-label">PASSWORD</label>
+            <input 
+              type="password" 
+              className="form-input" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          {error && <div style={{ color: 'var(--accent-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>{error}</div>}
+          <button type="submit" className="btn-submit" style={{ marginTop: '1rem' }}>ENTER THE DUNGEON 👺</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // --- Ticker Component ---
 function Ticker({ pledges }) {
-  const overdue = pledges.filter((p) => !p.done && isPastDeadline(p.deadline));
+  const overdue = pledges.filter((p) => !p.done && !p.failed && isPastDeadline(p.deadline));
   const msgs = overdue.length
     ? overdue.map((p) => `⚠ OVERDUE: "${p.task}" — The Gremlin demands answers!`)
     : ['✓ All clear! Keep it up.', '🔥 The Gremlin is watching...', '📋 No excuses. Just results.'];
@@ -34,7 +91,7 @@ function Ticker({ pledges }) {
 }
 
 // --- Header Component ---
-function Header({ streak }) {
+function Header({ streak, user, onLogout }) {
   return (
     <div className="header-container">
       <div>
@@ -42,11 +99,14 @@ function Header({ streak }) {
           THE <span className="text-gradient">ACCOUNTABILITY</span>
         </div>
         <div className="header-subtitle">GREMLIN 👺</div>
-        <div className="header-tagline">IT KNOWS WHAT YOU SAID. IT REMEMBERS.</div>
+        <div className="header-tagline">WATCHING YOU, {user.originalName.toUpperCase()}</div>
       </div>
-      <div className="streak-container">
-        <div className="streak-value">{streak}🔥</div>
-        <div style={{ fontSize: '0.7rem', color: 'var(--accent-success)', letterSpacing: '0.1em', marginTop: '4px', textTransform: 'uppercase' }}>Day Streak</div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
+        <button onClick={onLogout} style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.7rem', padding: '0.4rem 0.8rem', fontFamily: 'var(--font-mono)' }}>LOGOUT</button>
+        <div className="streak-container">
+          <div className="streak-value">{streak}🔥</div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--accent-success)', letterSpacing: '0.1em', marginTop: '4px', textTransform: 'uppercase' }}>Day Streak</div>
+        </div>
       </div>
     </div>
   );
@@ -133,7 +193,7 @@ function AddPledge({ onAdd }) {
             <input type="datetime-local" className="form-input" value={deadlineStr} onChange={(e) => setDeadlineStr(e.target.value)} style={{ marginBottom: '0.5rem' }} />
             <div className="quick-picks">
               {quickPicks.map((qp, i) => (
-                <button key={i} className="btn-quick-pick" onClick={() => setQuickPick(qp)}>{qp.label}</button>
+                <button key={i} className="btn-quick-pick" type="button" onClick={() => setQuickPick(qp)}>{qp.label}</button>
               ))}
             </div>
           </div>
@@ -144,8 +204,8 @@ function AddPledge({ onAdd }) {
           </div>
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-            <button className="btn-submit" onClick={submit} disabled={!task.trim() || !deadlineStr}>COMMIT TO THIS 🤝</button>
-            <button className="btn-cancel" onClick={() => setOpen(false)}>Cancel</button>
+            <button className="btn-submit" type="button" onClick={submit} disabled={!task.trim() || !deadlineStr}>COMMIT TO THIS 🤝</button>
+            <button className="btn-cancel" type="button" onClick={() => setOpen(false)}>Cancel</button>
           </div>
         </div>
       )}
@@ -272,13 +332,26 @@ function Modals({ modal, setModal, markFailed, markDone }) {
 
 // --- Main App ---
 export default function App() {
-  const [data, setData] = useState(loadData);
+  const [user, setUser] = useState(null);
+  const [data, setData] = useState(null);
   const [modal, setModal] = useState(null);
   const [filter, setFilter] = useState('active');
 
+  // Load data when user logs in
+  useEffect(() => {
+    if (user) {
+      setData(loadData(user.username));
+    }
+  }, [user]);
+
   function updateData(d) {
     setData(d);
-    saveData(d);
+    saveData(user.username, d);
+  }
+
+  function handleLogout() {
+    setUser(null);
+    setData(null);
   }
 
   function addPledge(fields) {
@@ -305,6 +378,17 @@ export default function App() {
     updateData({ ...data, pledges: data.pledges.filter((p) => p.id !== id) });
   }
 
+  if (!user) {
+    return (
+      <>
+        <CustomCursor />
+        <Login onLogin={setUser} />
+      </>
+    );
+  }
+
+  if (!data) return null; // Wait for data to load
+
   const filtered = data.pledges.filter((p) => {
     if (filter === 'active') return !p.done && !p.failed;
     if (filter === 'done') return p.done;
@@ -318,7 +402,7 @@ export default function App() {
     <div className="main-app-container">
       <CustomCursor />
       {overdue.length > 0 && <Ticker pledges={data.pledges} />}
-      <Header streak={data.streak || 0} />
+      <Header streak={data.streak || 0} user={user} onLogout={handleLogout} />
       <StatsBar pledges={data.pledges} />
       <AddPledge onAdd={addPledge} />
       
