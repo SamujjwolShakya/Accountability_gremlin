@@ -55,7 +55,7 @@ function Login({ onLogin }) {
               className="form-input" 
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
-              placeholder="e.g. Samujjwol"
+              placeholder="Enter username"
               required
             />
           </div>
@@ -72,7 +72,7 @@ function Login({ onLogin }) {
           </div>
           {error && <div style={{ color: 'var(--accent-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>{error}</div>}
           <button type="submit" className="btn-submit" style={{ marginTop: '1rem' }} disabled={isLoggingIn}>
-            {isLoggingIn ? 'CONNECTING TO CLOUD...' : 'ENTER THE DUNGEON 👺'}
+            {isLoggingIn ? 'CONNECTING...' : 'ENTER THE DUNGEON'}
           </button>
         </form>
       </div>
@@ -84,8 +84,8 @@ function Login({ onLogin }) {
 function Ticker({ pledges }) {
   const overdue = pledges.filter((p) => !p.done && !p.failed && isPastDeadline(p.deadline));
   const msgs = overdue.length
-    ? overdue.map((p) => `⚠ OVERDUE: "${p.task}" — The Gremlin demands answers!`)
-    : ['✓ All clear! Keep it up.', '🔥 The Gremlin is watching...', '📋 No excuses. Just results.'];
+    ? overdue.map((p) => `OVERDUE: "${p.task}" — The Gremlin demands answers!`)
+    : ['All clear! Keep it up.', 'The Gremlin is watching...', 'No excuses. Just results.'];
   const text = msgs.join('   ·   ');
   return (
     <div className="ticker-wrap">
@@ -104,13 +104,13 @@ function Header({ streak, user, onLogout }) {
         <div className="header-title">
           THE <span className="text-gradient">ACCOUNTABILITY</span>
         </div>
-        <div className="header-subtitle">GREMLIN 👺</div>
+        <div className="header-subtitle">GREMLIN</div>
         <div className="header-tagline">WATCHING YOU, {user.originalName.toUpperCase()}</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
         <button onClick={onLogout} style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.7rem', padding: '0.4rem 0.8rem', fontFamily: 'var(--font-mono)' }}>LOGOUT</button>
         <div className="streak-container">
-          <div className="streak-value">{streak}🔥</div>
+          <div className="streak-value">{streak}</div>
           <div style={{ fontSize: '0.7rem', color: 'var(--accent-success)', letterSpacing: '0.1em', marginTop: '4px', textTransform: 'uppercase' }}>Day Streak</div>
         </div>
       </div>
@@ -202,7 +202,7 @@ function AddPledge({ onAdd }) {
         <button className="btn-new-pledge" onClick={() => setOpen(true)}>+ NEW PLEDGE</button>
       ) : (
         <div className="pledge-form">
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--accent-secondary)' }}>📋 MAKE YOUR PLEDGE</div>
+          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--accent-secondary)' }}>MAKE YOUR PLEDGE</div>
           
           <div>
             <label className="form-label">WHAT WILL YOU DO? *</label>
@@ -218,14 +218,14 @@ function AddPledge({ onAdd }) {
                 className={`btn-tab ${tab === 'quick' ? 'active' : ''}`} 
                 onClick={() => setTab('quick')}
               >
-                ⚡ Quick Select
+                Quick Select
               </button>
               <button 
                 type="button"
                 className={`btn-tab ${tab === 'custom' ? 'active' : ''}`} 
                 onClick={() => setTab('custom')}
               >
-                📅 Custom Date
+                Custom Date
               </button>
             </div>
 
@@ -255,7 +255,7 @@ function AddPledge({ onAdd }) {
                   style={{ cursor: 'pointer', width: '100%' }}
                 />
                 <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--accent-secondary)' }}>
-                  💡 Click anywhere on the box above to open the calendar popup!
+                  Click anywhere on the box above to open the calendar popup.
                 </div>
               </div>
             )}
@@ -267,7 +267,7 @@ function AddPledge({ onAdd }) {
           </div>
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-            <button className="btn-submit" type="button" onClick={submit} disabled={!task.trim() || !deadlineStr}>COMMIT TO THIS 🤝</button>
+            <button className="btn-submit" type="button" onClick={submit} disabled={!task.trim() || !deadlineStr}>COMMIT TO THIS</button>
             <button className="btn-cancel" type="button" onClick={() => { setOpen(false); setSelectedQuickPick(null); }}>Cancel</button>
           </div>
         </div>
@@ -295,26 +295,26 @@ function PledgeCard({ pledge, onComplete, onFail, onDelete }) {
   return (
     <div className={`pledge-card ${overdue ? 'overdue' : ''}`} style={{ opacity: pledge.failed ? 0.6 : 1 }}>
       {overdue && <div className="badge badge-overdue">OVERDUE</div>}
-      {pledge.done && <div className="badge badge-done">DONE ✓</div>}
+      {pledge.done && <div className="badge badge-done">DONE</div>}
       
       <div className="pledge-task" style={{ textDecoration: pledge.done || pledge.failed ? 'line-through' : 'none', color: pledge.failed ? 'var(--text-muted)' : 'inherit' }}>
         {pledge.task}
       </div>
       
       <div className="pledge-meta">
-        <span>📅 {fmtDate(pledge.deadline)} at {fmtTime(pledge.deadline)}</span>
+        <span>{fmtDate(pledge.deadline)} at {fmtTime(pledge.deadline)}</span>
         {tl && !pledge.done && !pledge.failed && (
-          <span style={{ color: tl.includes('m left') && !tl.includes('h') ? 'var(--accent-primary)' : 'var(--accent-secondary)' }}>⏱ {tl}</span>
+          <span style={{ color: tl.includes('m left') && !tl.includes('h') ? 'var(--accent-primary)' : 'var(--accent-secondary)' }}>{tl}</span>
         )}
-        {pledge.consequence && <span>⚡ {pledge.consequence}</span>}
+        {pledge.consequence && <span>{pledge.consequence}</span>}
       </div>
       
-      {pledge.proof && <div style={{ fontSize: '0.8rem', color: 'var(--accent-success)', marginBottom: '1rem', fontStyle: 'italic', padding: '0.5rem', background: 'rgba(0,255,136,0.05)', borderRadius: '4px' }}>✓ "{pledge.proof}"</div>}
+      {pledge.proof && <div style={{ fontSize: '0.8rem', color: 'var(--accent-success)', marginBottom: '1rem', fontStyle: 'italic', padding: '0.5rem', background: 'rgba(255,200,92,0.05)', borderRadius: '4px' }}>"{pledge.proof}"</div>}
       
       {!pledge.done && !pledge.failed && (
         <div className="pledge-actions">
-          <button className="btn-done" onClick={onComplete}>✓ DONE</button>
-          {overdue && <button className="btn-fail" onClick={onFail}>✗ I FAILED</button>}
+          <button className="btn-done" onClick={onComplete}>DONE</button>
+          {overdue && <button className="btn-fail" onClick={onFail}>I FAILED</button>}
           <button style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', textDecoration: 'underline' }} onClick={onDelete}>Delete</button>
         </div>
       )}
@@ -355,11 +355,11 @@ function Modals({ modal, setModal, markFailed, markDone }) {
     return (
       <div className="modal-overlay">
         <div className="modal-content modal-fail">
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--accent-primary)', marginBottom: '1rem', textAlign: 'center', fontWeight: '900' }}>👺 FAILURE DETECTED</div>
+          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--accent-primary)', marginBottom: '1rem', textAlign: 'center', fontWeight: '900' }}>FAILURE DETECTED</div>
           <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--accent-glow)', minHeight: '100px', marginBottom: '1.5rem', fontStyle: 'italic', color: 'var(--text-primary)' }}>
             {loading ? <span style={{ animation: 'pulseGlow 1s infinite' }}>Summoning wrath...</span> : response}
           </div>
-          <button className="btn-submit" onClick={() => { markFailed(modal.pledge.id); setModal(null); }}>I ACCEPT MY SHAME 😔</button>
+          <button className="btn-submit" onClick={() => { markFailed(modal.pledge.id); setModal(null); }}>I ACCEPT MY SHAME</button>
         </div>
       </div>
     );
@@ -369,7 +369,7 @@ function Modals({ modal, setModal, markFailed, markDone }) {
     return (
       <div className="modal-overlay">
         <div className="modal-content modal-success">
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--accent-success)', marginBottom: '1rem', textAlign: 'center', fontWeight: '900' }}>🏆 PLEDGE COMPLETE!</div>
+          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--accent-success)', marginBottom: '1rem', textAlign: 'center', fontWeight: '900' }}>PLEDGE COMPLETE!</div>
           {!response ? (
             <>
               <div className="form-label" style={{ marginBottom: '1rem' }}>Prove it. What did you actually do?</div>
@@ -384,7 +384,7 @@ function Modals({ modal, setModal, markFailed, markDone }) {
           ) : (
             <>
               <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--success-glow)', marginBottom: '1.5rem', fontStyle: 'italic' }}>{response}</div>
-              <button className="btn-submit" style={{ background: 'var(--accent-success)', color: '#000' }} onClick={() => { markDone(modal.pledge.id, proof); setModal(null); setResponse(''); setProof(''); }}>LET'S KEEP GOING 🚀</button>
+              <button className="btn-submit" style={{ background: 'var(--accent-success)', color: '#000' }} onClick={() => { markDone(modal.pledge.id, proof); setModal(null); setResponse(''); setProof(''); }}>LET'S KEEP GOING</button>
             </>
           )}
         </div>
@@ -452,7 +452,7 @@ export default function App() {
   if (!data) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', fontFamily: 'var(--font-heading)', fontSize: '1.5rem', animation: 'pulseGlow 1s infinite' }}>
-        SUMMONING YOUR PLEDGES FROM THE CLOUD... 👺
+        SUMMONING YOUR PLEDGES FROM THE CLOUD...
       </div>
     );
   }
@@ -486,7 +486,7 @@ export default function App() {
           <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>
             {filter === 'active' ? (
               <>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem', animation: 'float 3s ease-in-out infinite' }}>👺</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem', animation: 'float 3s ease-in-out infinite' }}>...</div>
                 <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--text-secondary)' }}>Nothing here yet.</div>
                 <div style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>The Gremlin is waiting...</div>
               </>

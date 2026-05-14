@@ -318,12 +318,20 @@ button:active {
   gap: 0.5rem;
 }
 
+.tab-container {
+  display: flex;
+  background: var(--bg-primary);
+  padding: 0.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
 .btn-tab {
   flex: 1;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: none;
   color: var(--text-muted);
-  padding: 0.75rem;
+  padding: 0.6rem;
   font-family: var(--font-heading);
   font-size: 0.9rem;
   font-weight: 700;
@@ -333,32 +341,37 @@ button:active {
 }
 
 .btn-tab:hover {
-  background: var(--bg-secondary);
-  border-color: var(--accent-secondary);
   color: var(--text-primary);
 }
 
 .btn-tab.active {
-  background: rgba(255, 179, 0, 0.1);
-  border-color: var(--accent-secondary);
+  background: var(--bg-secondary);
   color: var(--accent-secondary);
-  box-shadow: inset 0 0 10px rgba(255, 179, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .btn-quick-pick {
-  background: var(--bg-secondary);
+  background: transparent;
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
-  font-family: var(--font-mono);
+  padding: 0.5rem 0.8rem;
   border-radius: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn-quick-pick:hover, .btn-quick-pick.active {
+.btn-quick-pick:hover {
+  background: var(--bg-primary);
   border-color: var(--accent-secondary);
-  color: var(--accent-secondary);
-  background: rgba(255, 179, 0, 0.1);
+  color: var(--text-primary);
+}
+
+.btn-quick-pick.active {
+  background: var(--accent-secondary);
+  color: var(--bg-primary);
+  border-color: var(--accent-secondary);
+  font-weight: 700;
 }
 
 .btn-submit {
@@ -589,4 +602,61 @@ button:active {
   min-height: 100vh;
   background: rgba(30, 16, 78, 0.8);
   backdrop-filter: blur(20px);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .header-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
+  
+  .header-container > div:last-child {
+    align-items: center !important;
+  }
+  
+  .streak-container {
+    text-align: center;
+  }
+  
+  .stats-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .pledge-actions {
+    flex-direction: column;
+  }
+  
+  .btn-done, .btn-fail {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .pledge-actions > button:last-child {
+    margin-left: 0 !important;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .quick-picks {
+    justify-content: center;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .btn-submit, .btn-cancel {
+    width: 100%;
+  }
+  
+  .pledge-form > div[style*="display: flex"] {
+    flex-direction: column;
+  }
 }
