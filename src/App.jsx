@@ -242,9 +242,13 @@ function AddPledge({ onAdd }) {
                   className="form-input" 
                   value={deadlineStr} 
                   onChange={handleCustomDateChange} 
+                  onClick={(e) => {
+                    if (e.target.showPicker) e.target.showPicker();
+                  }}
+                  style={{ cursor: 'pointer', width: '100%' }}
                 />
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Click the calendar icon inside the input to open the date/time picker popup.
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--accent-secondary)' }}>
+                  💡 Click anywhere on the box above to open the calendar popup!
                 </div>
               </div>
             )}
